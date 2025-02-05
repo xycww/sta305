@@ -136,6 +136,7 @@ knitr::kable(summary(portugalFit)$coef, digits = 3)
 ```{r}
 install.packages("glmmTMB")
 ```
+
 ```{r}
 library('glmmTMB')
 portugalNB = glmmTMB(
@@ -157,5 +158,36 @@ exp(confint(portugalNB, 1))
 
 ```{r}
 1/sqrt(confint(portugalNB, parm = "sigma"))
+```
+
+```{r}
+portugalNBCI = as.data.frame(exp(confint(portugalNB)[-1,]))
+portugalNBCI$level = gsub(paste(names(portugalNB$xlevels), collapse='|'),
+"", rownames(portugalNBCI))
+portugalNBCI$variable=unlist(strsplit(rownames(portugalNBCI),portugalNBCI$level))
+portugalNBCI$x = 1:nrow(portugalNBCI)
+portugalNBCI$cex = sqrt(1/apply(log(portugalNBCI[,1:2]),1,diff))
+forXaxis = tapply(portugalNBCI$x, portugalNBCI$variable, mean)
+portugalNBCI[1:3,]
+```
+
+```{r}
+# Extract the fixed effects from the model
+coef_values <- fixef(portugalNB)$cond
+
+# Apply exp() to the coefficients (excluding the intercept)
+exp_coef_values <- exp(coef_values[-1])
+
+# Now you can use 'exp_coef_values' for plotting
+matplot(portugalNBCI[, 1:2], type = 'n',
+        xaxt = 'n', bty = 'n', log = 'y', ylab = 'RR')
+segments(portugalNBCI$x, portugalNBCI[, 1], portugalNBCI$x, portugalNBCI[, 2])
+points(portugalNBCI$x, exp_coef_values, pch = 15,
+       cex = portugalNBCI$cex, col = '#00000030')
+mtext(portugalNBCI$level, 1, at = portugalNBCI$x,
+      las = 3, line = -1)
+mtext(names(forXaxis), 1, at = forXaxis, line = -2)
+abline(h = 1, lty = 3)
+
 ```
 
