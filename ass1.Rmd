@@ -99,6 +99,42 @@ Notes:
 - You should proceed as if an expert in this area has told you that you do not need to consider zero-inflation.  Zero-inflated models do not fit well to this data, probably because birth rates are lower than Fiji, many zeros are expected, and the likelihood is flat.
 
 ```{r}
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+
+# Summarize categorical variables (ageMarried and literacy)
+ageMarried_summary <- portugal %>%
+  group_by(ageMarried) %>%
+  summarise(Count = n(), Proportion = n() / nrow(portugal)) %>%
+  pivot_wider(names_from = ageMarried, values_from = Proportion)  # Pivot to wide format
+
+literacy_summary <- portugal %>%
+  group_by(literacy) %>%
+  summarise(Count = n(), Proportion = n() / nrow(portugal)) %>%
+  pivot_wider(names_from = literacy, values_from = Proportion)  # Pivot to wide format
+
+# Combine all summaries into one table
+summary_table <- list(
+  "Children" = children_summary,
+  "Months Since Married" = monthsSinceM_summary,
+  "Age Married (Category)" = ageMarried_summary,
+  "Literacy (Yes/No)" = literacy_summary
+)
+
+# Print the summary table
+kable(summary_table)
+
+
+```
+```{r}
+# Example for 'children' variable
+hist(portugal$children, main = "Distribution of Children", xlab = "Number of Children", col = "skyblue", breaks = 20)
+
+```
+
+
+```{r}
 table(portugal$ageMarried== '0to15', portugal$literacy)
 ```
 
@@ -134,8 +170,9 @@ knitr::kable(summary(portugalFit)$coef, digits = 3)
 
 
 ```{r}
-install.packages("glmmTMB")
+summary(portugalFit)
 ```
+
 
 ```{r}
 library('glmmTMB')
@@ -188,6 +225,46 @@ mtext(portugalNBCI$level, 1, at = portugalNBCI$x,
       las = 3, line = -1)
 mtext(names(forXaxis), 1, at = forXaxis, line = -2)
 abline(h = 1, lty = 3)
+
+```
+```{r}
+library(MASS)
+portugalNB2 <- glm.nb(children ~
+offset(logYearsMarried) +
+literacy + ageMarried, data = portugal)
+```
+
+```{r}
+1/sqrt(portugalNB2$theta)
+```
+
+```{r}
+sigma_est <- sigma(portugalNB)  # Extracts dispersion parameter
+theta_glmmTMB <- 1 / sigma_est^2  # Convert to theta
+theta_glmmTMB
+
+```
+
+```{r}
+dispersion_ratio <- sum(residuals(portugalFit, type="pearson")^2) / df.residual(portugalFit)
+dispersion_ratio
+
+```
+```{r}
+AIC(portugalFit, portugalNB)
+
+```
+
+```{r}
+m <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), mean)
+
+v <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), var)
+
+tab<-cbind(m, v[,3])
+
+knitr::kable(tab, digits=2,
+col.names=c("literacy",
+"agemarried", "Mean", "Variance"))
 
 ```
 
