@@ -5,7 +5,6 @@ subtitle: ass1
 output:
   pdf_document: default
   html_document: default
-date: today
 number-sections: true
 bibliography: references.bib
 thanks: "Code and data are available at: [https://github.com/xycww/sta305](https://github.com/xycww/sta305)."
@@ -17,6 +16,22 @@ This study, building upon the findings of the three preceding papers, will focus
 
 
 # Method
+This study examines how women’s literacy and age at marriage influence fertility rates by modeling the number of children per family. The response variable is the number of children in a family, which is a count variable. Since count data often follows a Poisson distribution, a Poisson Generalized Linear Model is first applied. 
+
+### Primary Predictor Variables of Interest:
+
+- **ageMarried (Age at marriage)**: Previous research suggests that delayed marriage may influence fertility rates. The reference category is ages 25-30, as this aligns with findings from @Song2018, which indicate that women in their 30s have the highest fertility rates.
+
+- **literacy (Literacy status)**: Prior studies suggest that higher female literacy rates are associated with lower birth rates.
+
+Since fertility rates naturally depend on how long a woman has been married, an offset term is included in the model to account for exposure time without treating it as a predictor variable. The offset is defined as log(years since marriage), where months since marriage is converted to years and log-transformed. This ensures that the model estimates fertility rates rather than just child counts.
+
+After fitting the Poisson model, the study assesses model appropriateness by comparing the variance and mean of the response variable. If the variance is significantly greater than the mean, this indicates overdispersion, suggesting that the Poisson assumption may not be appropriate. In such cases, a Negative Binomial model is applied, as it introduces an additional dispersion parameter that better accounts for variability in the data.
+
+To evaluate the significance of predictors and the variability in the response variable, hypothesis tests are conducted for the coefficients of both the Poisson and Negative Binomial models. Predictor significance is assessed using z-values and p-values, with a significance threshold of 0.05. Variables with p-values below 0.05 are considered to have a statistically significant impact on fertility rates. Additionally, 1/sqrt(theta) is examined in the Negative Binomial model to quantify the level of overdispersion. A comparison of standard errors between the two models is also made to assess how adjusting for overdispersion affects the reliability of coefficient estimates.
+
+This modeling approach provides a structured way to determine whether female literacy and age at marriage significantly impact family size, while also ensuring that the chosen statistical model appropriately accounts for data characteristics such as overdispersion.
+
 
 # Result
 
