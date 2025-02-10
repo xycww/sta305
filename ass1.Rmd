@@ -1,8 +1,18 @@
 ---
+title: "How do literacy and age of marriage affect family size"
+author: "Sakura Hu and Zhanyi Wang"
+subtitle: ass1
 output:
   pdf_document: default
   html_document: default
 ---
+# Introduction
+
+
+# Method
+
+# Result
+
 Portugal fertility survey 1979
 
 - [More information](https://wfs.dhsprogram.com/index.cfm?ccode=pt)
@@ -89,19 +99,13 @@ head(portugal)
 table(portugal$region)
 ```
 
-Region is `lt10k` rural areas (less than 10,000 people), towns of size 10-20k, 20k+, and the two largest cities (Lisbon and Porto).
+Figure 1 presents the statistical summary of the response variable, "Children." The number of children per family ranges from 0 to 17, indicating that some families have no children, while others have as many as 17. The distribution is right-skewed, with most families having 2 to 3 children. The mean number of children is 2.26, the median is 2, and the standard deviation is 1.86, reflecting moderate variability. The histogram shows that the data is concentrated around 2 to 3 children, with fewer families having very high numbers of children.
 
+Figure 2 provides the statistical summary of the independent variables, "Age Married" and "Literacy." Among the 5,148 samples, the majority of individuals marry between ages 20 to 25. Specifically, 1,126 individuals married between 20 to 22, and 1,468 individuals married between 22 to 25. In contrast, marriage before age 15 and after 30 is uncommon, with only 52 individuals marrying between 0 to 15 and 217 marrying after 30. The distribution of "Age Married" follows an approximately bell-shaped pattern, slightly left-skewed, with the peak occurring in the 22 to 25 category.
 
-The Question: 
+For "Literacy," the majority of individuals are literate. Out of the 5,148 samples, 4,567 individuals reported being literate, while only 581 reported otherwise. The distribution is highly skewed, with literacy being the dominant category.
 
-- How do literacy and age of marriage affect family size?
-- After we account for known explanatory variables, how much variation (if any) is there in birth rates?
-
-Notes: 
-
-- By European standards Portugal is a poor country, and in 1980 it had the same GDP per capita as Mexico.
-- It's well known that families are larger in rural areas (i.e. `region` is a confounder).
-- You should proceed as if an expert in this area has told you that you do not need to consider zero-inflation.  Zero-inflated models do not fit well to this data, probably because birth rates are lower than Fiji, many zeros are expected, and the likelihood is flat.
+These statistical summaries provide key insights into the dataset, highlighting the central tendency, spread, and shape of each variable while contextualizing the findings within the sample population.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 library(dplyr)
@@ -154,6 +158,8 @@ grid.arrange(
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
 # Summary statistics for categorical variables (Age Married and Literacy)
+portugal$ageMarried <- factor(portugal$ageMarried, 
+                              levels = c("0to15", "15to18", "18to20", "20to22", "22to25", "25to30", "30toInf", "never")) 
 ageMarried_summary <- portugal %>%
   count(ageMarried) %>%
   rename(Category = ageMarried, Count = n)
@@ -177,6 +183,7 @@ x_var_table <- kable(x_var_summary, format = "latex", booktabs = TRUE,
   kable_styling(latex_options = c("striped", "hold_position"))
 
 # Bar plot for Age Married
+# Define the correct order for ageMarried categories
 ageMarried_bar <- ggplot(portugal, aes(x = factor(ageMarried))) +  # Make sure 'ageMarried' is treated as a factor
   geom_bar(fill = "green", alpha = 0.6, color = "black") +
   theme_minimal() +
@@ -190,35 +197,28 @@ literacy_bar <- ggplot(portugal, aes(x = literacy)) +
 
 # Arrange table & plots in one figure with adjusted widths
 grid.arrange(tableGrob(x_var_summary), ageMarried_bar, literacy_bar, ncol = 3, 
-             widths = c(2, 2,1.2),  # Adjust widths for all 3 columns
-             top = textGrob("Figure 2: Statistical Summary and Histogram of independnet variables 'Age Married' and 'Literacy'. Out of 5148 samples, most samples married between 20 to 25, and there are 4567 samples who can read literature",
+             widths = c(1.5, 1.5,1.2),  # Adjust widths for all 3 columns
+             top = textGrob("Figure 2: Statistical Summary and Histogram of independnet variables 'Age Married' and 'Literacy'. \nOut of 5148 samples, most samples married between 20 to 25, \n and there are 4567 samples who can read literature",
                             gp = gpar(fontsize = 10, fontface = "bold")))
 
 
 ```
+To answer the research question, the data was first modeled using a Poisson regression with an offset for the log-transformed years married. The offset is included to account for the duration of marriage, which may influence the number of children over time. The model is specified as follows:
 
+\[
+Y_i \sim \text{Poisson}\left(\exp\left(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}_i) / 12\right)\right) + \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i \right)\right)
+\]
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-# Define groups
-literate <- portugal$literacy == "yes"
-illiterate <- portugal$literacy == "no"
+Where:
+\begin{itemize}
+    \item \(\text{children}\) is the count of children,
+    \item \(\text{offset}(\log(\max(1, \text{monthsSinceM})/12))\) adjusts for the number of years married,
+    \item \(\text{literacy}\) is a binary variable indicating whether the person is literate or not,
+    \item \(\text{ageMarried}\) is the categorical variable representing the age at which the person married, with "25to30" as the reference category.
+\end{itemize}
 
-# Create histogram for literate group
-hist(portugal[literate, "children"], 
-     breaks = 30, col = rgb(0, 0, 1, 0.5), 
-     prob = TRUE, main = "Children vs. Literacy", 
-     xlab = "children")
+Figure 3 shows the summary of this model. According to the results, the variable `literacyno` (indicating illiteracy) has a significant effect on the number of children, with an estimate of 0.159 and a standard error of 0.024. The corresponding z-value is 6.770, and the p-value is less than 0.005, indicating strong evidence against the null hypothesis and  suggesting that being illiterate (compared to being literate) is associated with a higher log count of children. Specifically, being illiterate increases the expected log count of children by 0.159, all else being equal. In contrast, the coefficients for the `ageMarried` categories (relative to the reference group of 25-30 years) do not show significant effects. For example, the coefficient for `ageMarried15to18` is 0.062 with a standard error of 0.037, yielding a z-value of 1.702 and a p-value of 0.089, which is above the standard significance level of 0.05, indicating that this result is not statistically significant. Similarly, other age categories, such as `ageMarried20to22` and `ageMarried30toInf`, show p-values of 0.598 and 0.891, respectively, suggesting no significant relationship between age at marriage and the number of children. Overall, while literacy is a statistically significant predictor, age at marriage does not appear to have a meaningful effect on the number of children in this model.
 
-# Add histogram for illiterate group
-hist(portugal[illiterate, "children"], 
-     breaks = 30, col = rgb(1, 0, 0, 0.5), 
-     prob = TRUE, add = TRUE)
-     
-# Add legend
-legend("topright", legend = c("Literate", "Illiterate"), 
-       fill = c(rgb(0, 0, 1, 0.5), rgb(1, 0, 0, 0.5)))
-
-```
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 portugal$logYearsMarried = log(pmax(1, portugal$monthsSinceM)/12)
 portugal$ageMarried = relevel(portugal$ageMarried, "25to30")
@@ -226,14 +226,73 @@ portugalFit = glm(children ~ offset(logYearsMarried) + literacy +
 ageMarried, data = portugal, family = poisson)
 knitr::kable(summary(portugalFit)$coef, digits = 3)
 ```
+Figure 4 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. Since the Poisson model assumes equal mean and variance, this violation suggests the need for a more flexible model. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
+\[
+Y_i \sim \text{NegBin}\left(\exp\left(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}_i) / 12\right)\right) + \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i \right), \theta \right)
+\]
+
+Where:
+\begin{itemize}
+  \item \(\text{children}\) represents the number of children,
+  \item \(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}) / 12\right)\right)\) adjusts for the number of years married,
+  \item \(\text{literacy}\) is a binary variable indicating whether the person is literate or not,
+  \item \(\text{ageMarried}\) is the categorical variable representing the age at which the person married.
+\end{itemize}
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-summary(portugalFit)
+
+m <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), mean)
+
+v <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), var)
+
+tab<-cbind(m, v[,3])
+
+knitr::kable(tab, digits=2,
+col.names=c("literacy",
+"agemarried", "Mean", "Variance"))
+
 ```
 
+This model shows that the there are The summary of this negative binomial is shown in Figure 5. According to the model results, literacy has a statistically significant effect on the number of children. Specifically, the coefficient for 'literacyno' (indicating illiteracy) is 0.148 with a standard error of 0.027, yielding a z-value of 5.570. The associated p-value is less than 0.05, providing strong evidence against the null hypothesis and suggesting that being illiterate is associated with a higher expected number of children. This suggests that, holding all else constant, being illiterate increases the expected log count of children by 0.148. 
+
+In contrast, the effects of age at marriage do not appear to be statistically significant in this model. The coefficients for different ageMarried categories are estimated relative to the reference group 25–30 years old. with all levels in ageMarried has p value greater than 0.05, which suggest that in this population, the timing of marriage alone may not be a key determinant of fertility outcomes once other factors, such as education, are taken into account. 
+
+The estimated dispersion measure is 0.2645, indicating that the variance exceeds the mean, which violates the Poisson model’s assumption of equidispersion. This justifies the use of a Negative Binomial model, which introduces an additional dispersion parameter to account for the excess variability.
+
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(MASS)
+portugalNB2 <- glm.nb(children ~
+offset(logYearsMarried) +
+literacy + ageMarried, data = portugal)
+knitr::kable(summary(portugalNB2)$coef, digits = 3)
+```
+
+```{r}
+# Load the necessary library
+
+# Get summary of the model (coefficients and their standard errors)
+coef_summary <- summary(portugalNB2)$coefficients
+
+# Get the confidence intervals for the model parameters
+conf_intervals <- confint(portugalNB2)
+
+# Display results using knitr::kable
+knitr::kable(
+  rbind(
+    coef_summary[, c(1, 2)],  # Estimates and Standard Errors
+    CI_lower = conf_intervals[, 1],  # Lower bound of CI
+    CI_upper = conf_intervals[, 2]   # Upper bound of CI
+  ),
+  caption = "Model Coefficients, Standard Errors, and Confidence Intervals"
+)
+
+
+```
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
 library('glmmTMB')
 portugalNB = glmmTMB(
 children ~
@@ -264,10 +323,11 @@ portugalNBCI$variable=unlist(strsplit(rownames(portugalNBCI),portugalNBCI$level)
 portugalNBCI$x = 1:nrow(portugalNBCI)
 portugalNBCI$cex = sqrt(1/apply(log(portugalNBCI[,1:2]),1,diff))
 forXaxis = tapply(portugalNBCI$x, portugalNBCI$variable, mean)
-portugalNBCI[1:3,]
+portugalNBCI
 ```
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
 # Extract the fixed effects from the model
 coef_values <- fixef(portugalNB)$cond
 
@@ -286,35 +346,15 @@ mtext(names(forXaxis), 1, at = forXaxis, line = -2)
 abline(h = 1, lty = 3)
 
 ```
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-library(MASS)
-portugalNB2 <- glm.nb(children ~
-offset(logYearsMarried) +
-literacy + ageMarried, data = portugal)
-```
+
+
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
+
 1/sqrt(portugalNB2$theta)
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-sigma_est <- sigma(portugalNB)  # Extracts dispersion parameter
-theta_glmmTMB <- 1 / sigma_est^2  # Convert to theta
-theta_glmmTMB
-
-```
 
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-m <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), mean)
 
-v <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), var)
-
-tab<-cbind(m, v[,3])
-
-knitr::kable(tab, digits=2,
-col.names=c("literacy",
-"agemarried", "Mean", "Variance"))
-
-```
-
+# Conclusion
