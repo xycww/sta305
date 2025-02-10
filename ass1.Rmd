@@ -5,8 +5,15 @@ subtitle: ass1
 output:
   pdf_document: default
   html_document: default
+date: today
+number-sections: true
+bibliography: references.bib
+thanks: "Code and data are available at: [https://github.com/xycww/sta305](https://github.com/xycww/sta305)."
 ---
 # Introduction
+The family size in a given region, particularly the number of children in each family, often reflects the local birth rate. A persistently low birth rate can lead to significant shifts in both societal implications and overall population size [@Fauser2024]. As many countries face a sharp decline in population, studying what factors affect family size has become a major concern for many policymakers and researchers.
+Previous studies have shown that some factors related to family situations might influence family size. The research of Sarma and Soni illustrates that there is an inverse relationship between female literacy rates and crude birth rates in India [@Saurabh2013], which means that in households where women are literate, the number of children tends to be lower. In another study examining birthrate rates in India, Talwar indicates that later marriage delays the age of childbirth for women and leads to fewer children being born[Talwar1967]. However, Song's research on Korean birth rates suggests a different view from Talwar's research, showing that the fertility rate of women in their 30s is significantly higher than that of women in their 20s [@Song2018]. These findings highlight the complex interplay between literacy, marriage age, and childbirth rate, which vary across different cultural and socioeconomic contexts.
+This study, building upon the findings of the three preceding papers, will focus on Portugal and employ Generalized linear regression analysis to model the existing data from the DHS World Fertility Survey [@DHS_WFS]. The primary objective is to examine the relationship between women's age at marriage, literacy rates, and fertility rates to derive meaningful insights. By investigating these factors, the study aims to provide valuable conclusions that can serve as a reference for future demographic research.
 
 
 # Method
@@ -254,7 +261,7 @@ col.names=c("literacy",
 
 ```
 
-This model shows that the there are The summary of this negative binomial is shown in Figure 5. According to the model results, literacy has a statistically significant effect on the number of children. Specifically, the coefficient for 'literacyno' (indicating illiteracy) is 0.148 with a standard error of 0.027, yielding a z-value of 5.570. The associated p-value is less than 0.05, providing strong evidence against the null hypothesis and suggesting that being illiterate is associated with a higher expected number of children. This suggests that, holding all else constant, being illiterate increases the expected log count of children by 0.148. 
+The summary of this negative binomial is shown in Figure 5. According to the model results, literacy has a statistically significant effect on the number of children. Specifically, the coefficient for 'literacyno' (indicating illiteracy) is 0.148 with a standard error of 0.027, yielding a z-value of 5.570. The associated p-value is less than 0.05, providing strong evidence against the null hypothesis and suggesting that being illiterate is associated with a higher expected number of children. This suggests that, holding all else constant, being illiterate increases the expected log count of children by 0.148. 
 
 In contrast, the effects of age at marriage do not appear to be statistically significant in this model. The coefficients for different ageMarried categories are estimated relative to the reference group 25–30 years old. with all levels in ageMarried has p value greater than 0.05, which suggest that in this population, the timing of marriage alone may not be a key determinant of fertility outcomes once other factors, such as education, are taken into account. 
 
@@ -358,3 +365,7 @@ abline(h = 1, lty = 3)
 
 
 # Conclusion
+
+\newpage
+
+# References
