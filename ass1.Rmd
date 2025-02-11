@@ -1,7 +1,6 @@
 ---
-title: "How do literacy and age of marriage affect family size"
+title: "The Influence of Women's Literacy and Marriage Age on Fertility Rates: A Statistical Analysis Using Generalized Linear Models"
 author: "Sakura Hu and Zhanyi Wang"
-subtitle: ass1
 output:
   pdf_document: default
   html_document: default
@@ -11,8 +10,8 @@ thanks: "Code and data are available at: [https://github.com/xycww/sta305](https
 ---
 # Introduction
 The family size in a given region, particularly the number of children in each family, often reflects the local birth rate. A persistently low birth rate can lead to significant shifts in both societal implications and overall population size [@Fauser2024]. As many countries face a sharp decline in population, studying what factors affect family size has become a major concern for many policymakers and researchers.
-Previous studies have shown that some factors related to family situations might influence family size. The research of Sarma and Soni illustrates that there is an inverse relationship between female literacy rates and crude birth rates in India [@Saurabh2013], which means that in households where women are literate, the number of children tends to be lower. In another study examining birthrate rates in India, Talwar indicates that later marriage delays the age of childbirth for women and leads to fewer children being born[Talwar1967]. However, Song's research on Korean birth rates suggests a different view from Talwar's research, showing that the fertility rate of women in their 30s is significantly higher than that of women in their 20s [@Song2018]. These findings highlight the complex interplay between literacy, marriage age, and childbirth rate, which vary across different cultural and socioeconomic contexts.
-This study, building upon the findings of the three preceding papers, will focus on Portugal and employ Generalized linear regression analysis to model the existing data from the DHS World Fertility Survey [@DHS_WFS]. The primary objective is to examine the relationship between women's age at marriage, literacy rates, and fertility rates to derive meaningful insights. By investigating these factors, the study aims to provide valuable conclusions that can serve as a reference for future demographic research.
+Previous studies have shown that some factors related to family situations might influence family size. The research of Sarma and Soni illustrates that there is an inverse relationship between female literacy rates and crude birth rates in India [@Saurabh2013], which means that in households where women are literate, the number of children tends to be lower. In another study examining birthrate rates in India, Talwar indicates that later marriage delays the age of childbirth for women and leads to fewer children being born[@Talwar1967]. However, Song's research on Korean birth rates suggests a different view from Talwar's research, showing that the fertility rate of women in their 30s is significantly higher than that of women in their 20s [@Song2018]. These findings highlight the complex interplay between literacy, marriage age, and childbirth rate, which vary across different cultural and socioeconomic contexts.
+This study, building upon the findings of the three preceding papers, will focus on Portugal and employ Generalized linear regression analysis to model the existing data from @DHS_WFS. The primary objective is to examine the relationship between women's age at marriage, literacy rates, and fertility rates to derive meaningful insights. By investigating these factors, the study aims to provide valuable conclusions that can serve as a reference for future demographic research.
 
 
 # Method
@@ -28,21 +27,12 @@ Since fertility rates naturally depend on how long a woman has been married, an 
 
 After fitting the Poisson model, the study assesses model appropriateness by comparing the variance and mean of the response variable. If the variance is significantly greater than the mean, this indicates overdispersion, suggesting that the Poisson assumption may not be appropriate. In such cases, a Negative Binomial model is applied, as it introduces an additional dispersion parameter that better accounts for variability in the data.
 
-To evaluate the significance of predictors and the variability in the response variable, hypothesis tests are conducted for the coefficients of both the Poisson and Negative Binomial models. Predictor significance is assessed using z-values and p-values, with a significance threshold of 0.05. Variables with p-values below 0.05 are considered to have a statistically significant impact on fertility rates. Additionally, 1/sqrt(theta) is examined in the Negative Binomial model to quantify the level of overdispersion. A comparison of standard errors between the two models is also made to assess how adjusting for overdispersion affects the reliability of coefficient estimates.
+To evaluate the significance of predictors and the variability in the response variable, hypothesis tests are conducted for the coefficients of both the Poisson and Negative Binomial models. Predictor significance is assessed using z-values and p-values, with a significance threshold of 0.05. Variables with p-values below 0.05 are considered to have a statistically significant impact on fertility rates. Additionally, 1/sqrt(theta) is examined in the Negative Binomial model to quantify the level of overdispersion. A comparison of confidence intervals between the two models is also made to assess how adjusting for overdispersion affects the reliability of coefficient estimates.
 
 This modeling approach provides a structured way to determine whether female literacy and age at marriage significantly impact family size, while also ensuring that the chosen statistical model appropriately accounts for data characteristics such as overdispersion.
 
 
 # Result
-
-Portugal fertility survey 1979
-
-- [More information](https://wfs.dhsprogram.com/index.cfm?ccode=pt)
-- [data source](https://wfs.dhsprogram.com/)
-- [data dictionary](https://wfs.dhsprogram.com/pt/ptsr01.dct)
-
-File `portugal.RData` on the course web site.  Code in `Assignment1.Rmd`
-
 
 ```{r dataDownload, include=FALSE}
 pUrl = 'http://wfs.dhsprogram.com/pt/ptsr01.dat'
@@ -116,11 +106,6 @@ portugal$region = relevel(portugal$region, 'lt10k')
 if(FALSE) save(portugal, file='portugal.RData')
 ```
 
-```{r thedata}
-head(portugal)
-table(portugal$region)
-```
-
 Figure 1 presents the statistical summary of the response variable, "Children." The number of children per family ranges from 0 to 17, indicating that some families have no children, while others have as many as 17. The distribution is right-skewed, with most families having 2 to 3 children. The mean number of children is 2.26, the median is 2, and the standard deviation is 1.86, reflecting moderate variability. The histogram shows that the data is concentrated around 2 to 3 children, with fewer families having very high numbers of children.
 
 Figure 2 provides the statistical summary of the independent variables, "Age Married" and "Literacy." Among the 5,148 samples, the majority of individuals marry between ages 20 to 25. Specifically, 1,126 individuals married between 20 to 22, and 1,468 individuals married between 22 to 25. In contrast, marriage before age 15 and after 30 is uncommon, with only 52 individuals marrying between 0 to 15 and 217 marrying after 30. The distribution of "Age Married" follows an approximately bell-shaped pattern, slightly left-skewed, with the peak occurring in the 22 to 25 category.
@@ -148,21 +133,20 @@ children_summary <- portugal %>%
   )
 
 # Create a table with caption
-table_with_caption <- arrangeGrob(
-  textGrob("Statistical Summary of Children Showing \nMean, Median, Standard Deviation, \nMinimum and Maximum", 
-           gp = gpar(fontsize = 10)),
-  tableGrob(children_summary),
-  heights = c(0.5, 3.0),  # Adjust these values to control spacing
-  ncol = 1
-)
+table_with_caption <- arrangeGrob(tableGrob(children_summary),
+                                  heights = c(1.5, 3.0),
+                                  ncol = 1)
 
 # Histogram for children with smaller title text
 children_hist <- ggplot(portugal, aes(x = children)) +
-  geom_histogram(bins = 30, fill = "blue", alpha = 0.6, color = "black") +
+  geom_histogram(
+    bins = 30,
+    fill = "blue",
+    alpha = 0.6,
+    color = "black"
+  ) +
   theme_minimal() +
-  labs(title = "Histogram of Number of Children:\nRight-Skewed Distribution with\nMost Families Having 2 to 3 Children", 
-       x = "Number of Children", 
-       y = "Frequency") +
+  labs(x = "Number of Children", y = "Frequency") +
   theme(plot.title = element_text(size = 10))
 
 # Arrange everything in one figure
@@ -170,9 +154,12 @@ grid.arrange(
   table_with_caption,
   children_hist,
   ncol = 2,
-  widths = c(1.5, 1),  # Equal widths for both columns
-  top = textGrob("Figure 1: Statistical Summary and Histogram of response variable 'Children'",
-                 gp = gpar(fontsize = 12, fontface = "bold"))
+  widths = c(1.5, 1),
+  # Equal widths for both columns
+  top = textGrob(
+    "Figure1: Statistical Summary and Distribution of the Response Variable 'Children'. \n This figure provides an overview of the distribution of the number of children per family. \nThe table on the left summarizes key statistics, including the \nmean, median, standard deviation, minimum, and maximum number of children. \nThe histogram on the right visually represents the distribution, showing that the \ndata is right-skewed, with most families having 2 to 3 children.",
+    gp = gpar(fontsize = 10, fontface = "bold")
+  )
 )
 ```
 
@@ -209,18 +196,20 @@ x_var_table <- kable(x_var_summary, format = "latex", booktabs = TRUE,
 ageMarried_bar <- ggplot(portugal, aes(x = factor(ageMarried))) +  # Make sure 'ageMarried' is treated as a factor
   geom_bar(fill = "green", alpha = 0.6, color = "black") +
   theme_minimal() +
-  labs(title = "Age Married Distribution", x = "Age Married Category", y = "Count") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels to prevent overlap
+  labs(title = "Distribution of Age at marriage", x = "Age", y = "Count") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
+  theme(plot.title = element_text(size = 10))
 
 literacy_bar <- ggplot(portugal, aes(x = literacy)) +
   geom_bar(fill = "orange", alpha = 0.6, color = "black") +
   theme_minimal() +
-  labs(title = "Literacy Distribution", x = "Literacy", y = "Count")
+  labs(title = "Distribution of Literacy Status", x = "Literacy", y = "Count") +
+  theme(plot.title = element_text(size = 10))
 
 # Arrange table & plots in one figure with adjusted widths
 grid.arrange(tableGrob(x_var_summary), ageMarried_bar, literacy_bar, ncol = 3, 
-             widths = c(1.5, 1.5,1.2),  # Adjust widths for all 3 columns
-             top = textGrob("Figure 2: Statistical Summary and Histogram of independnet variables 'Age Married' and 'Literacy'. \nOut of 5148 samples, most samples married between 20 to 25, \n and there are 4567 samples who can read literature",
+             widths = c(1.5, 1.2,1.5),  # Adjust widths for all 3 columns
+             top = textGrob("Figure 2: Statistical Summary and Distribution of Predictor Variables 'Age at marriage' and 'Literacy status'. \nThe table on the left summarizes the number of individuals in each category, showing that \n the majority of individuals marry between ages 20 to 25, with 1,126 marrying between 20 to 22 \n and 1,468 marrying between 22 to 25. Marriages before age 15 and after 30 are less common. \n The bar plot for 'Age Married' illustrates a slightly left-skewed distribution, peaking in the 22 to 25 category. \n The bar plot for ‘Literacy Status’ illustrates the proportion of literate and illiterate individuals, s\n showing that 4,567 out of 5,148 individuals in the dataset are literate.",
                             gp = gpar(fontsize = 10, fontface = "bold")))
 
 
@@ -246,8 +235,28 @@ portugal$logYearsMarried = log(pmax(1, portugal$monthsSinceM)/12)
 portugal$ageMarried = relevel(portugal$ageMarried, "25to30")
 portugalFit = glm(children ~ offset(logYearsMarried) + literacy +
 ageMarried, data = portugal, family = poisson)
-knitr::kable(summary(portugalFit)$coef, digits = 3)
 ```
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+coef_info <- coef(summary(portugalFit))
+
+# Compute exponentiated confidence intervals
+ci_info <- exp(confint(portugalFit))  # Drop intercept
+
+# Combine data without using summaryTable
+finalTable <- cbind(
+  round(coef_info, 3),  # Round coefficients, standard errors, z-values, p-values
+  LowerCI = round(ci_info[, 1], 3),  # Round lower bound of CI
+  UpperCI = round(ci_info[, 2], 3)   # Round upper bound of CI
+)
+
+# Display final table with reduced decimal places
+kable(finalTable, digits = 3, caption = "Table: Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
+```
+
+
 Figure 4 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. Since the Poisson model assumes equal mean and variance, this violation suggests the need for a more flexible model. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
 \[
 Y_i \sim \text{NegBin}\left(\exp\left(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}_i) / 12\right)\right) + \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i \right), \theta \right)
@@ -288,98 +297,34 @@ library(MASS)
 portugalNB2 <- glm.nb(children ~
 offset(logYearsMarried) +
 literacy + ageMarried, data = portugal)
-knitr::kable(summary(portugalNB2)$coef, digits = 3)
 ```
 
-```{r}
-# Load the necessary library
 
-# Get summary of the model (coefficients and their standard errors)
-coef_summary <- summary(portugalNB2)$coefficients
 
-# Get the confidence intervals for the model parameters
-conf_intervals <- confint(portugalNB2)
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+coef_info <- coef(summary(portugalNB2))
 
-# Display results using knitr::kable
-knitr::kable(
-  rbind(
-    coef_summary[, c(1, 2)],  # Estimates and Standard Errors
-    CI_lower = conf_intervals[, 1],  # Lower bound of CI
-    CI_upper = conf_intervals[, 2]   # Upper bound of CI
-  ),
-  caption = "Model Coefficients, Standard Errors, and Confidence Intervals"
+# Compute exponentiated confidence intervals
+PortugalNBCI = as.data.frame(exp(confint(portugalNB2)))  # Drop intercept
+colnames(PortugalNBCI) <- c("LowerCI", "UpperCI")
+
+# Ensure row names are preserved
+finalTable <- cbind(
+  round(coef_info, 3),  # Round coefficients, standard errors, z-values, p-values
+  LowerCI = round(PortugalNBCI$LowerCI, 3),  # Round lower bound of CI
+  UpperCI = round(PortugalNBCI$UpperCI, 3)   # Round upper bound of CI
 )
 
-
+# Display final table with reduced decimal places
+kable(finalTable, digits = 3, caption = "Table: Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
 ```
 
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
-library('glmmTMB')
-portugalNB = glmmTMB(
-children ~
-offset(logYearsMarried) +
-literacy + ageMarried, data = portugal, family=nbinom2)
-
-knitr::kable(
-  rbind(
-    confint(portugalNB)[1:7, c(3, 1, 2)],
-    sd = round(1 / sqrt(confint(portugalNB, parm = "sigma"))[3], digits = 3)
-  )
-)
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-exp(confint(portugalNB, 1))
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-1/sqrt(confint(portugalNB, parm = "sigma"))
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-portugalNBCI = as.data.frame(exp(confint(portugalNB)[-1,]))
-portugalNBCI$level = gsub(paste(names(portugalNB$xlevels), collapse='|'),
-"", rownames(portugalNBCI))
-portugalNBCI$variable=unlist(strsplit(rownames(portugalNBCI),portugalNBCI$level))
-portugalNBCI$x = 1:nrow(portugalNBCI)
-portugalNBCI$cex = sqrt(1/apply(log(portugalNBCI[,1:2]),1,diff))
-forXaxis = tapply(portugalNBCI$x, portugalNBCI$variable, mean)
-portugalNBCI
-```
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
-# Extract the fixed effects from the model
-coef_values <- fixef(portugalNB)$cond
-
-# Apply exp() to the coefficients (excluding the intercept)
-exp_coef_values <- exp(coef_values[-1])
-
-# Now you can use 'exp_coef_values' for plotting
-matplot(portugalNBCI[, 1:2], type = 'n',
-        xaxt = 'n', bty = 'n', log = 'y', ylab = 'RR')
-segments(portugalNBCI$x, portugalNBCI[, 1], portugalNBCI$x, portugalNBCI[, 2])
-points(portugalNBCI$x, exp_coef_values, pch = 15,
-       cex = portugalNBCI$cex, col = '#00000030')
-mtext(portugalNBCI$level, 1, at = portugalNBCI$x,
-      las = 3, line = -1)
-mtext(names(forXaxis), 1, at = forXaxis, line = -2)
-abline(h = 1, lty = 3)
-
-```
-
-
-
-```{r, echo=FALSE, warning=FALSE, message=FALSE}
-
-1/sqrt(portugalNB2$theta)
-```
 
 
 
 
 # Conclusion
+
 
 \newpage
 
