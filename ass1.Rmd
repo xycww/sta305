@@ -10,7 +10,7 @@ thanks: "Code and data are available at: [https://github.com/xycww/sta305](https
 ---
 # Introduction
 The family size in a given region, particularly the number of children in each family, often reflects the local birth rate. A persistently low birth rate can lead to significant shifts in both societal implications and overall population size [@Fauser2024]. As many countries face a sharp decline in population, studying what factors affect family size has become a major concern for many policymakers and researchers.
-Previous studies have shown that some factors related to family situations might influence family size. The research of Sarma and Soni illustrates that there is an inverse relationship between female literacy rates and crude birth rates in India [@Saurabh2013], which means that in households where women are literate, the number of children tends to be lower. In another study examining birthrate rates in India, Talwar indicates that later marriage delays the age of childbirth for women and leads to fewer children being born[@Talwar1967]. However, Song's research on Korean birth rates suggests a different view from Talwar's research, showing that the fertility rate of women in their 30s is significantly higher than that of women in their 20s [@Song2018]. These findings highlight the complex interplay between literacy, marriage age, and childbirth rate, which vary across different cultural and socioeconomic contexts.
+Previous studies have shown that some factors related to family situations might influence family size. The research of @Saurabh2013 illustrates that there is an inverse relationship between female literacy rates and crude birth rates in India [@Saurabh2013], which means that in households where women are literate, the number of children tends to be lower. In another study examining birth rate rates in India, Talwar indicates that later marriage delays the age of childbirth for women and leads to fewer children being born[@Talwar1967]. However, Song's research on Korean birth rates suggests a different view from Talwar's research, showing that the fertility rate of women in their 30s is significantly higher than that of women in their 20s [@Song2018]. These findings highlight the complex interplay between literacy, marriage age, and childbirth rate, which vary across different cultural and socioeconomic contexts.
 This study, building upon the findings of the three preceding papers, will focus on Portugal and employ Generalized linear regression analysis to model the existing data from @DHS_WFS. The primary objective is to examine the relationship between women's age at marriage, literacy rates, and fertility rates to derive meaningful insights. By investigating these factors, the study aims to provide valuable conclusions that can serve as a reference for future demographic research.
 
 
@@ -230,7 +230,7 @@ grid.arrange(
   ageMarried_bar,
   literacy_bar,
   ncol = 3,
-  widths = c(1.5, 1.2, 1.5),
+  widths = c(1.5, 1.1, 1.5),
   # Adjust widths for all 3 columns
   top = textGrob(
     "Figure 2: Statistical Summary and Distribution of Predictor Variables 'Age at marriage' \n and 'Literacy status'.The table on the left summarizes the number of individuals in each category, \n showing that the majority of individuals marry between ages 20 to 25, with 1,126 marrying between \n 20 to 22 and 1,468 marrying between 22 to 25. Marriages before age 15 and after 30 \n are less common. The bar plot for 'Age Married' illustrates a slightly left-skewed distribution, \n peaking in the 22 to 25 category. The bar plot for ‘Literacy Status’ illustrates the proportion of \n literate and illiterate individuals, showing that 4,567 out of 5,148 \n individuals in the dataset are literate.",
@@ -260,7 +260,7 @@ Where:
 O_i = \frac{\max(1, \text{monthsSinceM}_i)}{12}
 \]
 
-Figure 3 presents the summary results of the Poisson regression model. The predictor variable `literacyno` (indicating illiteracy) has a statistically significant effect on the number of children. The estimated coefficient is 0.159 with a standard error of 0.024, yielding a z-value of 6.770 and a p-value < 0.001. Since this p-value is below the significance level of 0.05, there is strong evidence against the null hypothesis, suggesting that being illiterate (compared to being literate) is associated with a higher log count of children. The 95% confidence interval ranges from 1.120 to 1.228, indicating that, all else being equal, illiterate women are expected to have approximately 1.120 to 1.228 times more children than literate women. In contrast, the coefficients for age at marriage categories do not show statistically significant effects, as all levels in this category have p-values greater than 0.05. Furthermore, their 95% confidence intervals include 1, indicating no meaningful difference in the expected number of children compared to the reference group (ages 25-30). Overall, while literacy is a statistically significant predictor, age at marriage does not appear to have a meaningful effect on the number of children in this model.
+Table 1 presents the summary results of the Poisson regression model. The predictor variable `literacyno` (indicating illiteracy) has a statistically significant effect on the number of children. The estimated coefficient is 0.159 with a standard error of 0.024, yielding a z-value of 6.770 and a p-value < 0.001. Since this p-value is below the significance level of 0.05, there is strong evidence against the null hypothesis, suggesting that being illiterate (compared to being literate) is associated with a higher log count of children. The 95% confidence interval ranges from 1.120 to 1.228, indicating that, all else being equal, illiterate women are expected to have approximately 1.120 to 1.228 times more children than literate women. In contrast, the coefficients for age at marriage categories do not show statistically significant effects, as all levels in this category have p-values greater than 0.05. Furthermore, their 95% confidence intervals include 1, indicating no meaningful difference in the expected number of children compared to the reference group (ages 25-30). Overall, while literacy is a statistically significant predictor, age at marriage does not appear to have a meaningful effect on the number of children in this model.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 portugal$logYearsMarried = log(pmax(1, portugal$monthsSinceM)/12)
@@ -284,11 +284,10 @@ finalTable <- cbind(
 )
 
 # Display final table with reduced decimal places
-kable(finalTable, digits = 3, caption = "Coefficients and Confidence Intervals for the Possion Model.\n
-This table presents the estimated coefficients, standard errors, z-values, p-values, \n and the corresponding 95% confidence intervals (CI) for the model. The coefficient estimates reflect the relationship between each predictor and the number of children, while the confidence intervals provide a range of values within which the true parameter is likely to fall. The exponentiated coefficients (odds ratios) and their confidence intervals indicate the expected multiplicative change in the outcome variable for a one-unit increase in the predictor. Key findings show the significant predictors of fertility, with their associated confidence intervals suggesting the range of possible effects.")
+kable(finalTable, digits = 3, caption = "<b><small>Coefficients and Confidence Intervals for the Poisson Model. \n This table shows the estimated coefficients, standard errors, \n z-values, p-values, and the corresponding 95% confidence intervals \n for the Poisson regression model. The variable literacy status \n is a statistically significant predictor, with illiterate \n women expected to have 12-23% more children than literate women, holding other \n factors constant. In contrast, the age at marriage categories do not show significant \n effects on the number of children.</small></b>")
 ```
 
-Figure 4 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
+Table 2 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
 \[
 Y_i \sim \text{Negative Binomial}(\pi_i, \theta)
 \]
@@ -314,19 +313,26 @@ O_i = \frac{\max(1, \text{monthsSinceM}_i)}{12}
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
-m <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), mean)
+m <- aggregate(portugal$children,
+               by = list(portugal$literacy, portugal$ageMarried),
+               mean)
 
-v <- aggregate(portugal$children, by=list(portugal$literacy, portugal$ageMarried), var)
+v <- aggregate(portugal$children,
+               by = list(portugal$literacy, portugal$ageMarried),
+               var)
 
-tab<-cbind(m, v[,3])
+tab <- cbind(m, v[, 3])
 
-knitr::kable(tab, digits=2,
-col.names=c("literacy",
-"agemarried", "Mean", "Variance"))
+knitr::kable(
+  tab,
+  digits = 2,
+  col.names = c("literacy", "agemarried", "Mean", "Variance"),
+  caption = "<b><small>Mean and Variance of Children by Literacy and Age at Marriage. The results indicate that in certain columns, the variance is significantly larger than the mean, suggesting the presence of overdispersion.</small></b>"
+)
 
 ```
 
-Figure 5 presents the summary results of the Negative Binomial (NB) regression model, which was used to model the count of children. The predictor variable literacyno (indicating illiteracy) remains statistically significant in this model. The estimated coefficient for illiteracy is 0.148, with a standard error of 0.027, yielding a z-value of 5.570 and a p-value < 0.001. This p-value, being below the significance threshold of 0.05, strongly rejects the null hypothesis and indicates that being illiterate is associated with a higher expected number of children. Specifically, being illiterate increases the expected log count of children by 0.148, holding all else constant. The 95% confidence interval (CI) for this effect ranges from 1.100 to 1.221, suggesting that illiterate women are expected to have approximately 1.100 to 1.221 times more children than literate women, all else being equal.
+Table 3 presents the summary results of the Negative Binomial (NB) regression model, which was used to model the count of children. The predictor variable literacyno (indicating illiteracy) remains statistically significant in this model. The estimated coefficient for illiteracy is 0.148, with a standard error of 0.027, yielding a z-value of 5.570 and a p-value < 0.001. This p-value, being below the significance threshold of 0.05, strongly rejects the null hypothesis and indicates that being illiterate is associated with a higher expected number of children. Specifically, being illiterate increases the expected log count of children by 0.148, holding all else constant. The 95% confidence interval (CI) for this effect ranges from 1.100 to 1.221, suggesting that illiterate women are expected to have approximately 1.100 to 1.221 times more children than literate women, all else being equal.
 
 In contrast, the effects of age at marriage on fertility are not statistically significant in this model. The coefficients for all categories of age at marriage (relative to the reference category of 25–30 years old) have p-values greater than 0.05, indicating that the timing of marriage, once literacy is accounted for, does not significantly impact the number of children. Additionally, the 95% confidence intervals for all categories include 1, further supporting this conclusion.
 
@@ -359,7 +365,7 @@ finalTable <- cbind(
 )
 
 # Display final table with reduced decimal places
-kable(finalTable, digits = 3, caption = "Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
+kable(finalTable, digits = 3, caption = "<b><small>Coefficients and Confidence Intervals for the Poisson Model. \n This table shows the estimated coefficients, standard errors, \n z-values, p-values, and the corresponding 95% confidence intervals \n for the Poisson regression model. The variable literacy status \n is a statistically significant predictor, with illiterate \n women expected to have 10-23% more children than literate women, holding other \n factors constant. In contrast, the age at marriage categories do not show significant \n effects on the number of children.</small></b>")
 ```
 
 
