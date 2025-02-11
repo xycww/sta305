@@ -106,13 +106,11 @@ portugal$region = relevel(portugal$region, 'lt10k')
 if(FALSE) save(portugal, file='portugal.RData')
 ```
 
-Figure 1 presents the statistical summary of the response variable, "Children." The number of children per family ranges from 0 to 17, indicating that some families have no children, while others have as many as 17. The distribution is right-skewed, with most families having 2 to 3 children. The mean number of children is 2.26, the median is 2, and the standard deviation is 1.86, reflecting moderate variability. The histogram shows that the data is concentrated around 2 to 3 children, with fewer families having very high numbers of children.
+Figure 1 presents the statistical summary of the response variable "Children." The number of children per family ranges from 0 to 17, indicating that some families have no children, while others have as many as 17. The distribution is concentrated around 2 to 3 children and right-skewed, indicating that fewer families having very high numbers of children. The mean number of children is 2.26, the median is 2, and the standard deviation is 1.86. 
 
-Figure 2 provides the statistical summary of the independent variables, "Age Married" and "Literacy." Among the 5,148 samples, the majority of individuals marry between ages 20 to 25. Specifically, 1,126 individuals married between 20 to 22, and 1,468 individuals married between 22 to 25. In contrast, marriage before age 15 and after 30 is uncommon, with only 52 individuals marrying between 0 to 15 and 217 marrying after 30. The distribution of "Age Married" follows an approximately bell-shaped pattern, slightly left-skewed, with the peak occurring in the 22 to 25 category.
+Figure 2 provides the statistical summary of the independent variables `Age at marriage` and `Literacy Status`. Among the 5,148 samples, the majority of individuals marry between ages 20 to 25. Specifically, 1,126 individuals married between 20 to 22, and 1,468 individuals married between 22 to 25. In contrast, marriage before age 15 and after 30 is uncommon, with only 52 individuals marrying between 0 to 15 and 217 marrying after 30. The distribution of `Age at marriage` follows an approximately bell-shaped pattern, slightly left-skewed, with the peak occurring in the 22 to 25 category. This suggests that most individuals marry in early adulthood, but fewer marry very young or much later.
 
-For "Literacy," the majority of individuals are literate. Out of the 5,148 samples, 4,567 individuals reported being literate, while only 581 reported otherwise. The distribution is highly skewed, with literacy being the dominant category.
-
-These statistical summaries provide key insights into the dataset, highlighting the central tendency, spread, and shape of each variable while contextualizing the findings within the sample population.
+For `Literacy Status`, the majority of individuals are literate. Out of the 5,148 samples, 4,567 individuals reported being literate, while only 581 reported otherwise. The distribution is highly skewed, with literacy being the dominant category.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 library(dplyr)
@@ -166,9 +164,21 @@ grid.arrange(
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
+
 # Summary statistics for categorical variables (Age Married and Literacy)
-portugal$ageMarried <- factor(portugal$ageMarried, 
-                              levels = c("0to15", "15to18", "18to20", "20to22", "22to25", "25to30", "30toInf", "never")) 
+portugal$ageMarried <- factor(
+  portugal$ageMarried,
+  levels = c(
+    "0to15",
+    "15to18",
+    "18to20",
+    "20to22",
+    "22to25",
+    "25to30",
+    "30toInf",
+    "never"
+  )
+)
 ageMarried_summary <- portugal %>%
   count(ageMarried) %>%
   rename(Category = ageMarried, Count = n)
@@ -187,48 +197,70 @@ x_var_summary <- bind_rows(
 x_var_summary <- x_var_summary[, c("Variable", "Category", "Count")]
 
 # Create a table for X variables summary
-x_var_table <- kable(x_var_summary, format = "latex", booktabs = TRUE, 
-                      caption = "Statistical Summary of X Variables (Counts)") %>%
+x_var_table <- kable(
+  x_var_summary,
+  format = "latex",
+  booktabs = TRUE,
+  caption = "Statistical Summary of X Variables (Counts)"
+) %>%
   kable_styling(latex_options = c("striped", "hold_position"))
 
 # Bar plot for Age Married
 # Define the correct order for ageMarried categories
 ageMarried_bar <- ggplot(portugal, aes(x = factor(ageMarried))) +  # Make sure 'ageMarried' is treated as a factor
-  geom_bar(fill = "green", alpha = 0.6, color = "black") +
+  geom_bar(fill = "green",
+           alpha = 0.6,
+           color = "black") +
   theme_minimal() +
   labs(title = "Distribution of Age at marriage", x = "Age", y = "Count") +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1))+ 
-  theme(plot.title = element_text(size = 10))
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme(plot.title = element_text(size = 8))
 
 literacy_bar <- ggplot(portugal, aes(x = literacy)) +
-  geom_bar(fill = "orange", alpha = 0.6, color = "black") +
+  geom_bar(fill = "orange",
+           alpha = 0.6,
+           color = "black") +
   theme_minimal() +
   labs(title = "Distribution of Literacy Status", x = "Literacy", y = "Count") +
-  theme(plot.title = element_text(size = 10))
+  theme(plot.title = element_text(size = 8))
 
 # Arrange table & plots in one figure with adjusted widths
-grid.arrange(tableGrob(x_var_summary), ageMarried_bar, literacy_bar, ncol = 3, 
-             widths = c(1.5, 1.2,1.5),  # Adjust widths for all 3 columns
-             top = textGrob("Figure 2: Statistical Summary and Distribution of Predictor Variables 'Age at marriage' and 'Literacy status'. \nThe table on the left summarizes the number of individuals in each category, showing that \n the majority of individuals marry between ages 20 to 25, with 1,126 marrying between 20 to 22 \n and 1,468 marrying between 22 to 25. Marriages before age 15 and after 30 are less common. \n The bar plot for 'Age Married' illustrates a slightly left-skewed distribution, peaking in the 22 to 25 category. \n The bar plot for ‘Literacy Status’ illustrates the proportion of literate and illiterate individuals, s\n showing that 4,567 out of 5,148 individuals in the dataset are literate.",
-                            gp = gpar(fontsize = 10, fontface = "bold")))
-
+grid.arrange(
+  tableGrob(x_var_summary),
+  ageMarried_bar,
+  literacy_bar,
+  ncol = 3,
+  widths = c(1.5, 1.2, 1.5),
+  # Adjust widths for all 3 columns
+  top = textGrob(
+    "Figure 2: Statistical Summary and Distribution of Predictor Variables 'Age at marriage' \n and 'Literacy status'.The table on the left summarizes the number of individuals in each category, \n showing that the majority of individuals marry between ages 20 to 25, with 1,126 marrying between \n 20 to 22 and 1,468 marrying between 22 to 25. Marriages before age 15 and after 30 \n are less common. The bar plot for 'Age Married' illustrates a slightly left-skewed distribution, \n peaking in the 22 to 25 category. The bar plot for ‘Literacy Status’ illustrates the proportion of \n literate and illiterate individuals, showing that 4,567 out of 5,148 \n individuals in the dataset are literate.",
+    gp = gpar(fontsize = 10, fontface = "bold")
+  )
+)
 
 ```
-To answer the research question, the data was first modeled using a Poisson regression with an offset for the log-transformed years married. The offset is included to account for the duration of marriage, which may influence the number of children over time. The model is specified as follows:
+To address the research question, the data was first modeled using a Poisson regression with an offset for the log-transformed years married. The offset is included to account for the duration of marriage, which may influence the number of children over time. The model is specified as follows:
 
 \[
-Y_i \sim \text{Poisson}\left(\exp\left(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}_i) / 12\right)\right) + \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i \right)\right)
+Y_i \sim \text{Poisson}(\pi_i)
+\]
+
+\[
+\log(\pi_i) = \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i + \log(O_i)
 \]
 
 Where:
 \begin{itemize}
-    \item \(\text{children}\) is the count of children,
-    \item \(\text{offset}(\log(\max(1, \text{monthsSinceM})/12))\) adjusts for the number of years married,
-    \item \(\text{literacy}\) is a binary variable indicating whether the person is literate or not,
-    \item \(\text{ageMarried}\) is the categorical variable representing the age at which the person married, with "25to30" as the reference category.
+    \item $\pi_i$ represents the expected number of children per individual,
+    \item $\beta_1$ and $\beta_2$ are the coefficients for literacy and age at marriage, respectively,
+    \item $O_i$ is the offset term, defined as: 
 \end{itemize}
 
-Figure 3 shows the summary of this model. According to the results, the variable `literacyno` (indicating illiteracy) has a significant effect on the number of children, with an estimate of 0.159 and a standard error of 0.024. The corresponding z-value is 6.770, and the p-value is less than 0.005, indicating strong evidence against the null hypothesis and  suggesting that being illiterate (compared to being literate) is associated with a higher log count of children. Specifically, being illiterate increases the expected log count of children by 0.159, all else being equal. In contrast, the coefficients for the `ageMarried` categories (relative to the reference group of 25-30 years) do not show significant effects. For example, the coefficient for `ageMarried15to18` is 0.062 with a standard error of 0.037, yielding a z-value of 1.702 and a p-value of 0.089, which is above the standard significance level of 0.05, indicating that this result is not statistically significant. Similarly, other age categories, such as `ageMarried20to22` and `ageMarried30toInf`, show p-values of 0.598 and 0.891, respectively, suggesting no significant relationship between age at marriage and the number of children. Overall, while literacy is a statistically significant predictor, age at marriage does not appear to have a meaningful effect on the number of children in this model.
+\[
+O_i = \frac{\max(1, \text{monthsSinceM}_i)}{12}
+\]
+
+Figure 3 presents the summary results of the Poisson regression model. The predictor variable `literacyno` (indicating illiteracy) has a statistically significant effect on the number of children. The estimated coefficient is 0.159 with a standard error of 0.024, yielding a z-value of 6.770 and a p-value < 0.001. Since this p-value is below the significance level of 0.05, there is strong evidence against the null hypothesis, suggesting that being illiterate (compared to being literate) is associated with a higher log count of children. The 95% confidence interval ranges from 1.120 to 1.228, indicating that, all else being equal, illiterate women are expected to have approximately 1.120 to 1.228 times more children than literate women. In contrast, the coefficients for age at marriage categories do not show statistically significant effects, as all levels in this category have p-values greater than 0.05. Furthermore, their 95% confidence intervals include 1, indicating no meaningful difference in the expected number of children compared to the reference group (ages 25-30). Overall, while literacy is a statistically significant predictor, age at marriage does not appear to have a meaningful effect on the number of children in this model.
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 portugal$logYearsMarried = log(pmax(1, portugal$monthsSinceM)/12)
@@ -236,7 +268,6 @@ portugal$ageMarried = relevel(portugal$ageMarried, "25to30")
 portugalFit = glm(children ~ offset(logYearsMarried) + literacy +
 ageMarried, data = portugal, family = poisson)
 ```
-
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -253,22 +284,32 @@ finalTable <- cbind(
 )
 
 # Display final table with reduced decimal places
-kable(finalTable, digits = 3, caption = "Table: Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
+kable(finalTable, digits = 3, caption = "Coefficients and Confidence Intervals for the Possion Model.\n
+This table presents the estimated coefficients, standard errors, z-values, p-values, \n and the corresponding 95% confidence intervals (CI) for the model. The coefficient estimates reflect the relationship between each predictor and the number of children, while the confidence intervals provide a range of values within which the true parameter is likely to fall. The exponentiated coefficients (odds ratios) and their confidence intervals indicate the expected multiplicative change in the outcome variable for a one-unit increase in the predictor. Key findings show the significant predictors of fertility, with their associated confidence intervals suggesting the range of possible effects.")
 ```
 
-
-Figure 4 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. Since the Poisson model assumes equal mean and variance, this violation suggests the need for a more flexible model. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
+Figure 4 presents the means and variances of literacy and age at marriage. In several cases, the variance is at least twice as large as the mean, indicating potential overdispersion. To address this, a Negative Binomial model is applied, which allows the variance to exceed the mean by introducing an additional dispersion parameter. The model is specified as follows:
 \[
-Y_i \sim \text{NegBin}\left(\exp\left(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}_i) / 12\right)\right) + \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i \right), \theta \right)
+Y_i \sim \text{Negative Binomial}(\pi_i, \theta)
+\]
+
+\[
+\log(\pi_i) = \beta_1 \cdot \text{literacy}_i + \beta_2 \cdot \text{ageMarried}_i + \log(O_i)
 \]
 
 Where:
 \begin{itemize}
-  \item \(\text{children}\) represents the number of children,
-  \item \(\text{offset}\left(\log\left(\max(1, \text{monthsSinceM}) / 12\right)\right)\) adjusts for the number of years married,
-  \item \(\text{literacy}\) is a binary variable indicating whether the person is literate or not,
-  \item \(\text{ageMarried}\) is the categorical variable representing the age at which the person married.
+    \item $Y_i$ represents the number of children in a family,
+    \item $\pi_i$ is the expected number of children per individual,
+    \item $\theta$ is the dispersion parameter, allowing for overdispersion in the data,
+    \item $\beta_1$ and $\beta_2$ are the coefficients for literacy and age at marriage, respectively,
+    \item $O_i$ is the offset term, defined as: 
 \end{itemize}
+
+\[
+O_i = \frac{\max(1, \text{monthsSinceM}_i)}{12}
+\]
+
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -285,11 +326,13 @@ col.names=c("literacy",
 
 ```
 
-The summary of this negative binomial is shown in Figure 5. According to the model results, literacy has a statistically significant effect on the number of children. Specifically, the coefficient for 'literacyno' (indicating illiteracy) is 0.148 with a standard error of 0.027, yielding a z-value of 5.570. The associated p-value is less than 0.05, providing strong evidence against the null hypothesis and suggesting that being illiterate is associated with a higher expected number of children. This suggests that, holding all else constant, being illiterate increases the expected log count of children by 0.148. 
+Figure 5 presents the summary results of the Negative Binomial (NB) regression model, which was used to model the count of children. The predictor variable literacyno (indicating illiteracy) remains statistically significant in this model. The estimated coefficient for illiteracy is 0.148, with a standard error of 0.027, yielding a z-value of 5.570 and a p-value < 0.001. This p-value, being below the significance threshold of 0.05, strongly rejects the null hypothesis and indicates that being illiterate is associated with a higher expected number of children. Specifically, being illiterate increases the expected log count of children by 0.148, holding all else constant. The 95% confidence interval (CI) for this effect ranges from 1.100 to 1.221, suggesting that illiterate women are expected to have approximately 1.100 to 1.221 times more children than literate women, all else being equal.
 
-In contrast, the effects of age at marriage do not appear to be statistically significant in this model. The coefficients for different ageMarried categories are estimated relative to the reference group 25–30 years old. with all levels in ageMarried has p value greater than 0.05, which suggest that in this population, the timing of marriage alone may not be a key determinant of fertility outcomes once other factors, such as education, are taken into account. 
+In contrast, the effects of age at marriage on fertility are not statistically significant in this model. The coefficients for all categories of age at marriage (relative to the reference category of 25–30 years old) have p-values greater than 0.05, indicating that the timing of marriage, once literacy is accounted for, does not significantly impact the number of children. Additionally, the 95% confidence intervals for all categories include 1, further supporting this conclusion.
 
-The estimated dispersion measure is 0.2645, indicating that the variance exceeds the mean, which violates the Poisson model’s assumption of equidispersion. This justifies the use of a Negative Binomial model, which introduces an additional dispersion parameter to account for the excess variability.
+The estimated overdispersion measure is 0.2645, which is calculated as 1/sqrt(theta). This measure suggests that the variance in the data exceeds the mean, a condition known as overdispersion. This justifies the use of the Negative Binomial model, which includes an additional dispersion parameter to better account for this excess variability.
+
+In conclusion, although evidence of overdispersion is present in the data, the results from both the Poisson and Negative Binomial models are similar. Both models suggest that literacy status is a significant predictor of fertility, while age at marriage is not. Although the standard error is slightly larger in the Negative Binomial model, and the confidence intervals are slightly wider, this can be attributed to the Negative Binomial model accounting for overdispersion. These results demonstrate that while both models yield similar findings, the Negative Binomial model provides a more accurate reflection of the data’s variability due to its ability to handle overdispersion.
 
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
@@ -316,14 +359,29 @@ finalTable <- cbind(
 )
 
 # Display final table with reduced decimal places
-kable(finalTable, digits = 3, caption = "Table: Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
+kable(finalTable, digits = 3, caption = "Log-rate ratios and 95% confidence intervals for the Negative Binomial model relating school institution type, region, and interactions to the number of violent crimes.")
 ```
 
 
-
-
-
 # Conclusion
+
+According to the result, the negative binomial model has been chosen as the fitted model, which be present as:
+
+\[
+\begin{aligned}
+\log(\text{Children/Year Since Married}) &= -1.772 + 0.148 \cdot \text{literacyno} \\
+&\quad + 0.057 \cdot \text{ageMarried0to15} + 0.073 \cdot \text{ageMarried15to18} \\
+&\quad + 0.059 \cdot \text{ageMarried18to20} + 0.025 \cdot \text{ageMarried20to22} \\
+&\quad - 0.011 \cdot \text{ageMarried22to25} + 0.011 \cdot \text{ageMarried30toInf}
+\end{aligned}
+\]
+
+Among the predictors, literacy shows a statistically significant effect. The p-value for the "literacyno" variable < 0.001, indicating strong evidence against the null hypothesis. The estimated coefficient for literacy is 0.148, and exponentiating this coefficient (e^0.148 = 1.16) shows that illiterate women aged 25 to 30, on average, experience a 16% higher birth rate compared to literate women, holding all other variables constant. The 95% confidence interval (1.100 to 1.221) suggests that the true effect is consistently positive, as it does not include 1. In contrast, age at marriage does not appear to significantly influence the number of children, with p-values greater than 0.05 across all categories. This suggests that, within this dataset, the timing of marriage does not have a meaningful effect on fertility rates, once literacy is accounted for.
+
+These findings diverge from some literature that suggests the timing of marriage plays a significant role in fertility rates. For example, Talwar's research suggests that delaying marriage generally leads to lower fertility [@Talwar1967]. However, this study's findings align with the understanding that the relationship between marriage age and fertility is context-dependent. As this study focuses on Portugal, where cultural and socioeconomic factors may differ significantly from those in other countries like India, it is reasonable to observe these discrepancies. Furthermore, the significant effect of literacy is consistent with previous research, such as [@Saurabh2013], which found that illiterate women tend to have higher fertility rates.
+
+This study provides valuable insights into the relationship between literacy and fertility in Portugal. The findings suggest that literacy is a significant predictor of fertility, while age at marriage does not significantly influence birth rates in this context. The results have important implications for policymakers, as they highlight the potential role of women’s education in addressing population growth. By improving educational opportunities for women, policymakers could foster greater control over fertility rates, ultimately contributing to sustainable population management.
+
 
 
 \newpage
